@@ -11,6 +11,7 @@ import collections
 import matplotlib.pyplot as plt
 from datetime import timedelta
 import math
+from dateutil.relativedelta import relativedelta
 
 
 def read_excel():
@@ -182,57 +183,98 @@ def delete_search_short_interval(df_):
     df_.sort_values(by='date', ascending=True, inplace=True)
     # date列をindexにする
     # raw_data_df = raw_data_df.set_index("date")
-    print(df_)
+    print(df_.reset_index(drop=True))
 
-    # df=df_[["date","parKurumaNo"]]
-    # df = df_.set_index("date")
-    # agg_10m = df.groupby(pd.Grouper(freq='0.5Min')).aggregate([np.sum, max])
-    # print(agg_10m)
-    # print(df)
-
-    split_time = 10
+    # 一定間隔の定義（秒数）
+    split_interval = 10
     # 子ユーザリスト作成
     child_user_list = df_['子ユーザ'].unique()
+    # 重複を除いたレコードを格納するデータフレーム
+    duplicate_excluded_df = pd.DataFrame()
+
     for c in child_user_list:
         tmp_df = df_[df_["子ユーザ"] == c]
+        # 最初のレコードの時刻をstartとする
         start = tmp_df.iloc[0]["date"]
         end = tmp_df.iloc[-1]["date"]
         # print(start)
         # print(end)
-        seconds_diff = (end-start)/timedelta(seconds=60)
-        split_num = math.floor(seconds_diff/split_time)
-        if split_num == 0:
-            split_num = 1
-        else:
-            pass
 
-        n = tmp_df.shape[0]
-        # データフレームをスライス
-        # dfs = [tmp_df.loc[i:i + split_num - 1, :] for i in range(0, n, split_num)]
-        # print(dfs)
-        # for df_i in dfs:
-        #     print(df_i)
+        # 差分を秒で取得、小数点切り捨て
+        seconds_diff = math.floor((end - start).total_seconds())
 
-        # get_records = math.floor(tmp_df.shape[0]/split_num)
-        # for s in range(split_num):
-        #     print(tmp_df[:split_num])
+        tmp_df.reset_index(drop=True, inplace=True)
 
-        print(split_num)
-        print("---")
+        end = start + datetime.timedelta(seconds=seconds_diff)  # 秒後
 
+        print(start)
+        split_time = start + relativedelta(seconds=split_interval)
+        print(split_time)
 
+        # end - startの秒数を算出し最大値とする
+        counts = math.floor(seconds_diff / split_interval) + 1
 
+        for c in range(counts):
+            s = split_interval * c
+            # split_time秒毎にスライスする
+            mask = (tmp_df['date'] >= pd.Timestamp(start) + datetime.timedelta(seconds=s)) & \
+                   (tmp_df['date'] <= pd.Timestamp(split_time) + datetime.timedelta(seconds=s))
+            print(tmp_df[mask])
+            # 最後のレコード（最後の検索）を取得する
+            duplicate_excluded_df = duplicate_excluded_df.append(tmp_df[mask].tail(1), ignore_index=True)
 
-        # for s in
-        #     # 最初のレコードの時刻をstartとする
-        #     start = tmp_df.iloc[0]["date"]
-        #     end = start + datetime.timedelta(seconds=3)  # 1秒後
-        #     mask = (df_['date'] >= pd.Timestamp(start)) & \
-        #            (df_['date'] <= pd.Timestamp(end))
-        #     print(tmp_df[mask])
-        # 1秒後をendとする
-        # 末尾レコード抽出して新しいデータフレームに格納
-        # end +
+    print(duplicate_excluded_df)
+    duplicate_excluded_df.to_csv("out/duplicate_excluded_df.csv", index=False)
+
+    # # split_time秒毎にスライスする
+    # mask = (tmp_df['date'] >= pd.Timestamp(start)) & \
+    #        (tmp_df['date'] <= pd.Timestamp(split_time))
+    # print(tmp_df[mask])
+
+    # for seconds_diff:
+    #     mask = (tmp_df['date'] >= pd.Timestamp(start)) & \
+    #            (tmp_df['date'] <= pd.Timestamp(end))
+    #     print(tmp_df[mask])
+
+    # print(seconds_diff)
+    #
+    # # 分割するレコード数
+    # k = math.floor(seconds_diff)
+    # print(k)
+    # if k == 0:
+    #     k = 1
+    # else:
+    #     pass
+    # tmp_df.reset_index(drop=True, inplace=True)
+    # n = tmp_df.shape[0]
+    #
+    # # データフレームをスライス
+    # dfs = [tmp_df.loc[i:i + k - 1, :] for i in range(0, n, k)]
+    # for df_i in dfs:
+    #     print(df_i)
+
+    # dfs = [tmp_df.loc[i:i + split_num - 1, :] for i in range(0, n, split_num)]
+    # # print(dfs)
+    # for df_i in dfs:
+    #     print(df_i)
+
+    # get_records = math.floor(tmp_df.shape[0]/split_num)
+    # for s in range(split_num):
+    #     print(tmp_df[:split_num])
+
+    # print(split_num)
+    print("---")
+
+    # for s in
+    #     # 最初のレコードの時刻をstartとする
+    #     start = tmp_df.iloc[0]["date"]
+    #     end = start + datetime.timedelta(seconds=3)  # 1秒後
+    #     mask = (df_['date'] >= pd.Timestamp(start)) & \
+    #            (df_['date'] <= pd.Timestamp(end))
+    #     print(tmp_df[mask])
+    # 1秒後をendとする
+    # 末尾レコード抽出して新しいデータフレームに格納
+    # end +
 
     # start = '2021-11-09 16:04:27'
     # end = '2021-11-09 16:05:43'
