@@ -8,6 +8,9 @@ import io
 import re
 import itertools
 import collections
+import matplotlib.pyplot as plt
+from datetime import timedelta
+import math
 
 
 def read_excel():
@@ -156,7 +159,7 @@ def split_parameter_cols(df, raw_data_df):
     df_.to_csv("out/param_cols.csv", index=False)
 
     # 月日, 時刻, 子ユーザカラムを付与しなおす
-    df_ = pd.concat([raw_data_df[["月日", "時刻", "子ユーザ"]], df_], axis=1)
+    df_ = pd.concat([raw_data_df[["月日", "時刻", "子ユーザ", "入力値"]], df_], axis=1)
 
     return df_
 
@@ -181,22 +184,73 @@ def delete_search_short_interval(df_):
     # raw_data_df = raw_data_df.set_index("date")
     print(df_)
 
+    # df=df_[["date","parKurumaNo"]]
+    # df = df_.set_index("date")
+    # agg_10m = df.groupby(pd.Grouper(freq='0.5Min')).aggregate([np.sum, max])
+    # print(agg_10m)
+    # print(df)
+
+    split_time = 10
+    # 子ユーザリスト作成
+    child_user_list = df_['子ユーザ'].unique()
+    for c in child_user_list:
+        tmp_df = df_[df_["子ユーザ"] == c]
+        start = tmp_df.iloc[0]["date"]
+        end = tmp_df.iloc[-1]["date"]
+        # print(start)
+        # print(end)
+        seconds_diff = (end-start)/timedelta(seconds=60)
+        split_num = math.floor(seconds_diff/split_time)
+        if split_num == 0:
+            split_num = 1
+        else:
+            pass
+
+        n = tmp_df.shape[0]
+        # データフレームをスライス
+        # dfs = [tmp_df.loc[i:i + split_num - 1, :] for i in range(0, n, split_num)]
+        # print(dfs)
+        # for df_i in dfs:
+        #     print(df_i)
+
+        # get_records = math.floor(tmp_df.shape[0]/split_num)
+        # for s in range(split_num):
+        #     print(tmp_df[:split_num])
+
+        print(split_num)
+        print("---")
+
+
+
+
+        # for s in
+        #     # 最初のレコードの時刻をstartとする
+        #     start = tmp_df.iloc[0]["date"]
+        #     end = start + datetime.timedelta(seconds=3)  # 1秒後
+        #     mask = (df_['date'] >= pd.Timestamp(start)) & \
+        #            (df_['date'] <= pd.Timestamp(end))
+        #     print(tmp_df[mask])
+        # 1秒後をendとする
+        # 末尾レコード抽出して新しいデータフレームに格納
+        # end +
+
     # start = '2021-11-09 16:04:27'
-    # end = '2021-11-09 16:04:43'
-    # mask = (raw_data_df['date'] >= pd.Timestamp(start)) & \
-    #        (raw_data_df['date'] <= pd.Timestamp(end)) & \
-    #        (raw_data_df['入力値'] == "MQ513048")
-    # print(raw_data_df[mask].reset_index(drop=True))
+    # end = '2021-11-09 16:05:43'
+    # mask = (df_['date'] >= pd.Timestamp(start)) & \
+    #        (df_['date'] <= pd.Timestamp(end))
+    # # (df_['入力値'] == "MQ513048")
+    # print(df_[mask].reset_index(drop=True))
+
+    """
+    ヒストグラム
+    """
+    # print(df_.resample('s', on='date').child_user.sum())
 
     """
     同一子ユーザが同時刻の間に同じ入力値を選択した場合、最新のレコードを抽出する
     """
     # df_.drop_duplicates(subset=['date', 'parKurumaNo'],inplace=True)
-    print(df_[~df_.duplicated()])
-
-
-
-
+    # print(df_.duplicated())
 
     """
     時刻が5秒以内かつparKurumaNoが同じの場合、直近のレコード（末尾のレコード）を取得する
