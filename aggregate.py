@@ -183,7 +183,7 @@ def delete_search_short_interval(df_):
     df_.sort_values(by='date', ascending=True, inplace=True)
     # date列をindexにする
     # raw_data_df = raw_data_df.set_index("date")
-    print(df_.reset_index(drop=True))
+    # print(df_.reset_index(drop=True))
 
     # 一定間隔の定義（秒数）
     split_interval = 10
@@ -207,161 +207,24 @@ def delete_search_short_interval(df_):
 
         end = start + datetime.timedelta(seconds=seconds_diff)  # 秒後
 
-        print(start)
         split_time = start + relativedelta(seconds=split_interval)
-        print(split_time)
+        # print(split_time)
 
         # end - startの秒数を算出し最大値とする
         counts = math.floor(seconds_diff / split_interval) + 1
 
         for c in range(counts):
             s = split_interval * c
+            print(f"{s}-{s+split_interval-1}sec")
             # split_time秒毎にスライスする
             mask = (tmp_df['date'] >= pd.Timestamp(start) + datetime.timedelta(seconds=s)) & \
                    (tmp_df['date'] <= pd.Timestamp(split_time) + datetime.timedelta(seconds=s))
             print(tmp_df[mask])
             # 最後のレコード（最後の検索）を取得する
             duplicate_excluded_df = duplicate_excluded_df.append(tmp_df[mask].tail(1), ignore_index=True)
-
-    print(duplicate_excluded_df)
+    # print(duplicate_excluded_df)
     duplicate_excluded_df.to_csv("out/duplicate_excluded_df.csv", index=False)
-
-    # # split_time秒毎にスライスする
-    # mask = (tmp_df['date'] >= pd.Timestamp(start)) & \
-    #        (tmp_df['date'] <= pd.Timestamp(split_time))
-    # print(tmp_df[mask])
-
-    # for seconds_diff:
-    #     mask = (tmp_df['date'] >= pd.Timestamp(start)) & \
-    #            (tmp_df['date'] <= pd.Timestamp(end))
-    #     print(tmp_df[mask])
-
-    # print(seconds_diff)
-    #
-    # # 分割するレコード数
-    # k = math.floor(seconds_diff)
-    # print(k)
-    # if k == 0:
-    #     k = 1
-    # else:
-    #     pass
-    # tmp_df.reset_index(drop=True, inplace=True)
-    # n = tmp_df.shape[0]
-    #
-    # # データフレームをスライス
-    # dfs = [tmp_df.loc[i:i + k - 1, :] for i in range(0, n, k)]
-    # for df_i in dfs:
-    #     print(df_i)
-
-    # dfs = [tmp_df.loc[i:i + split_num - 1, :] for i in range(0, n, split_num)]
-    # # print(dfs)
-    # for df_i in dfs:
-    #     print(df_i)
-
-    # get_records = math.floor(tmp_df.shape[0]/split_num)
-    # for s in range(split_num):
-    #     print(tmp_df[:split_num])
-
-    # print(split_num)
-    print("---")
-
-    # for s in
-    #     # 最初のレコードの時刻をstartとする
-    #     start = tmp_df.iloc[0]["date"]
-    #     end = start + datetime.timedelta(seconds=3)  # 1秒後
-    #     mask = (df_['date'] >= pd.Timestamp(start)) & \
-    #            (df_['date'] <= pd.Timestamp(end))
-    #     print(tmp_df[mask])
-    # 1秒後をendとする
-    # 末尾レコード抽出して新しいデータフレームに格納
-    # end +
-
-    # start = '2021-11-09 16:04:27'
-    # end = '2021-11-09 16:05:43'
-    # mask = (df_['date'] >= pd.Timestamp(start)) & \
-    #        (df_['date'] <= pd.Timestamp(end))
-    # # (df_['入力値'] == "MQ513048")
-    # print(df_[mask].reset_index(drop=True))
-
-    """
-    ヒストグラム
-    """
-    # print(df_.resample('s', on='date').child_user.sum())
-
-    """
-    同一子ユーザが同時刻の間に同じ入力値を選択した場合、最新のレコードを抽出する
-    """
-    # df_.drop_duplicates(subset=['date', 'parKurumaNo'],inplace=True)
-    # print(df_.duplicated())
-
-    """
-    時刻が5秒以内かつparKurumaNoが同じの場合、直近のレコード（末尾のレコード）を取得する
-    入力値とparKurumaNoは同じとする
-    """
-    # groupbyで子ユーザ毎にする
-    index_df = df_.set_index('子ユーザ')
-    index_df.to_csv("out/index_df.csv")
-
-    # print(df_[df_['子ユーザ'] == 221002])
-
-    # 同一子ユーザがn秒間の間に同じ入力値を選択した場合、最新のレコードを抽出する
-
-    # ある子ユーザがある入力値を検索した後、同一子ユーザがn秒間の間に同一入力値を検索した場合は削除する（カウントしない）
-
-    # すべてのカラムが重複している場合は重複レコードとして削除する
-    # print(raw_data_df["date"].between_time('16:04:25', '16:04:43'))
-
     return
-
-
-# def summarize_search_short_interval(raw_data_df):
-#     date_list = []
-#     for date in raw_data_df['月日']:
-#         date_list.append(date.strftime('%Y-%m-%d'))
-#     raw_data_df['月日'] = pd.DataFrame(date_list)
-#
-#     time_list = []
-#     for time in raw_data_df['時刻']:
-#         time_list.append(time.strftime('%H:%M:%S'))
-#     raw_data_df['時刻'] = pd.DataFrame(time_list)
-#     # 月日 時刻を結合してdate列を作成
-#     raw_data_df['date'] = raw_data_df['月日'].str.cat(raw_data_df['時刻'], sep=' ')
-#     # 文字列 -> datetime
-#     raw_data_df['date'] = pd.to_datetime(raw_data_df['date'])
-#     # date昇順に並び替え
-#     raw_data_df.sort_values(by='date', ascending=True, inplace=True)
-#     # date列をindexにする
-#     # raw_data_df = raw_data_df.set_index("date")
-#     print(raw_data_df)
-#
-#     # start = '2021-11-09 16:04:27'
-#     # end = '2021-11-09 16:04:43'
-#     # mask = (raw_data_df['date'] >= pd.Timestamp(start)) & \
-#     #        (raw_data_df['date'] <= pd.Timestamp(end)) & \
-#     #        (raw_data_df['入力値'] == "MQ513048")
-#     # print(raw_data_df[mask].reset_index(drop=True))
-#
-#     """
-#     入力値が同じかつ時刻が5秒以内であれば、直近のレコード（末尾のレコード）を取得する
-#     """
-#     # groupbyで子ユーザ毎にする
-#     index_df = raw_data_df.set_index('子ユーザ')
-#
-#     # index_df.to_csv("out/index_df.csv")
-#
-#     # 入力値とparKurumaNoは同じとする
-#
-#
-#     # 同一子ユーザが同時刻の間に同じ入力値を選択した場合、最新のレコードを抽出する
-#
-#     # 同一子ユーザがn秒間の間に同じ入力値を選択した場合、最新のレコードを抽出する
-#
-#     # ある子ユーザがある入力値を検索した後、同一子ユーザがn秒間の間に同一入力値を検索した場合は削除する（カウントしない）
-#
-#     # すべてのカラムが重複している場合は重複レコードとして削除する
-#     # print(raw_data_df["date"].between_time('16:04:25', '16:04:43'))
-#
-#     return
 
 
 def main():
