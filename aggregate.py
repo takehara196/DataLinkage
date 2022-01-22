@@ -15,7 +15,9 @@ from dateutil.relativedelta import relativedelta
 
 
 def read_excel():
-    raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
+    #raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
+    # raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
+    raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
     # 月日, 時刻カラムは必ず使用する為, カラム使用の判別に用いない
     df = raw_data_df.drop(["月日", "時刻"], axis=1)
     return raw_data_df, df
@@ -108,7 +110,7 @@ def split_parameter_cols(df, raw_data_df):
 
     df_ = pd.DataFrame()
 
-    for col in range(6):
+    for col in range(df_param.shape[1]):
         for key in key_list:
             df_[f'{key}_{col}'] = df_param[col].str.match(f'.*{key}=')
             # df_[f'{key}_{col}'] = df_param[col].str.match(f'.*{key}=*')
@@ -124,12 +126,32 @@ def split_parameter_cols(df, raw_data_df):
     df_.columns = cols
     # 同一カラムが存在する場合は結合して一つのカラムにする
     identifier = df_.columns.to_series().groupby(level=0).transform('cumcount')
+
     df_.columns = df_.columns.astype('string') + "_" + identifier.astype('string')
-    df_['CallHinban_1'].to_csv("out/CallHinban_1.csv", index=False)
-    df_['CallHinban_0'].to_csv("out/CallHinban_0.csv", index=False)
-    df_['CallHinban'] = df_['CallHinban_0'].str.cat(df_['CallHinban_1'], na_rep='')
-    # カラム削除
-    df_.drop(["CallHinban_0", "CallHinban_1"], axis=1, inplace=True)
+
+    # Indexのサフィックスの数値から結合
+    # サフィックスの数値が0であれば何もしない
+    merge_col_list = []
+    for col in df_.columns:
+        # アンダーバーの数値が0なら何もしない
+        if "_0" in col:
+            pass
+        # サフィックスの数値が0以外であれば数値回だけ結合する
+        else:
+            col = col.split('_')[0]
+            merge_col_list.append(col)
+    print(merge_col_list)
+
+    # 動的にサフィックスの数値を取得
+    sa = 1
+    for col in merge_col_list:
+        for s in range(sa):
+            a = str(s)
+            b = str(s + 1)
+            df_[f'{col}'] = df_[f'{col}_{a}'].str.cat(df_[f'{col}_{b}'], na_rep='')
+            # カラム削除
+            df_.drop([f"{col}_{a}", f"{col}_{b}"], axis=1, inplace=True)
+
     # サフィックスを削除
     cols = df_.columns.str.replace('_.*', '', regex=True)
     # カラム名変更
@@ -138,24 +160,32 @@ def split_parameter_cols(df, raw_data_df):
     for key in key_list:
         df_[f"{key}"] = df_[f"{key}"].str.replace(f"{key}=", "")
 
-    # カンマ区切りで複数要素が入った列を集計
-    # ParamList, KurumaInfo, parHinmokuNos, parMakerNos
-    # / を , に変換
+    print(df_)
 
-    # df_["KurumaInfo"] = df_["KurumaInfo"].fillna("/")
+    split_cols = []
+    # /区切りの要素が入るカラムを特定する
+    for c in cols:
+        print(c)
+        df_c = df_[df_[c].str.contains("/", na=False)]
+        # レコード数取得
+        # 0レコード以外カラム名をリストに格納する
+        if df_c.shape[0] == 0:
+            pass
+        else:
+            split_cols.append(c)
 
-    split_cols = ["ParamList", "KurumaInfo", "parHinmokuNos", "parMakerNos"]
     for col in split_cols:
         df_[f"{col}"] = df_[f"{col}"].fillna("/")
         df_[f"{col}"] = df_[f"{col}"].replace('/', ',', regex=True)
         df_[f"{col}"] = df_[f"{col}"].str.split(',')
-        df_[f"{col}"].to_csv(f"out/{col}.csv", index=False)
+
+
 
     # 可視化の際利用
     ans = sum(df_['ParamList'], [])
     c = collections.Counter(ans)
     df_c = pd.DataFrame.from_dict(c, orient='index').reset_index()
-    # print(df_c)
+    print(df_c)
 
     df_.to_csv("out/param_cols.csv", index=False)
 
