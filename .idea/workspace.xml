@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ef4bf926-bb35-41f3-804b-f065041cd049" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/V8LOG.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/index_df.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/index_df.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/param_cols.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/param_cols.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/use_cols_df.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/use_cols_df.csv" afterDir="false" />
-    </list>
+    <list default="true" id="ef4bf926-bb35-41f3-804b-f065041cd049" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
