@@ -15,9 +15,9 @@ from dateutil.relativedelta import relativedelta
 
 
 def read_excel():
-    # raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
+    raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
     # raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
-    raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
+    #raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
     # 月日, 時刻カラムは必ず使用する為, カラム使用の判別に用いない
     df = raw_data_df.drop(["月日", "時刻"], axis=1)
     return raw_data_df, df
