@@ -15,7 +15,7 @@ from dateutil.relativedelta import relativedelta
 
 
 def read_excel():
-    #raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
+    # raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
     # raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
     raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
     # 月日, 時刻カラムは必ず使用する為, カラム使用の判別に用いない
@@ -179,8 +179,6 @@ def split_parameter_cols(df, raw_data_df):
         df_[f"{col}"] = df_[f"{col}"].replace('/', ',', regex=True)
         df_[f"{col}"] = df_[f"{col}"].str.split(',')
 
-
-
     # 可視化の際利用
     ans = sum(df_['ParamList'], [])
     c = collections.Counter(ans)
@@ -245,7 +243,7 @@ def delete_search_short_interval(df_):
 
         for c in range(counts):
             s = split_interval * c
-            print(f"{s}-{s+split_interval-1}sec")
+            print(f"{s}-{s + split_interval - 1}sec")
             # split_time秒毎にスライスする
             mask = (tmp_df['date'] >= pd.Timestamp(start) + datetime.timedelta(seconds=s)) & \
                    (tmp_df['date'] <= pd.Timestamp(split_time) + datetime.timedelta(seconds=s))
