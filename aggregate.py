@@ -15,9 +15,9 @@ from dateutil.relativedelta import relativedelta
 
 
 def read_excel():
-    #raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
-    #raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
-    raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
+    raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
+    # raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
+    # raw_data_df = pd.read_excel("rawdata/Taiyoubuhinten_v8LOG.xlsx")
     # 月日, 時刻カラムは必ず使用する為, カラム使用の判別に用いない
     df = raw_data_df.drop(["月日", "時刻"], axis=1)
     return raw_data_df, df
@@ -104,12 +104,13 @@ def split_parameter_cols(df, raw_data_df):
 
     # 先頭の1文字を削除(先頭の,を削除)
     df["パラメータ等"] = df["パラメータ等"].str[1:]
+    print(df["パラメータ等"])
 
     # カンマで分割する
     df_param = df['パラメータ等'].str.split(',', expand=True)
+    # df_param.to_csv("df_param.csv", encoding="cp932")
 
     df_ = pd.DataFrame()
-
     for col in range(df_param.shape[1]):
         for key in key_list:
             df_[f'{key}_{col}'] = df_param[col].str.match(f'.*{key}=')
@@ -129,6 +130,7 @@ def split_parameter_cols(df, raw_data_df):
 
     df_.columns = df_.columns.astype('string') + "_" + identifier.astype('string')
 
+
     # Indexのサフィックスの数値から結合
     # サフィックスの数値が0であれば何もしない
     merge_col_list = []
@@ -138,46 +140,82 @@ def split_parameter_cols(df, raw_data_df):
             pass
         # サフィックスの数値が0以外であれば数値回だけ結合する
         else:
+            print(f"col: {col}")
             col = col.split('_')[0]
+            print(f"col: {col}")
             merge_col_list.append(col)
-    print(merge_col_list)
+    print(f"merge_col_list: {merge_col_list}")
 
+    # print(f"df_before: {df_}")
+    df_.to_csv("df_before.csv")
+
+    # サフィックスの最大値を取得する
+    suffix_max = max(list(identifier))
+    print(list(identifier))
     # 動的にサフィックスの数値を取得
-    sa = 1
+    sa = suffix_max
     for col in merge_col_list:
         for s in range(sa):
-            a = str(s)
-            b = str(s + 1)
-            df_[f'{col}'] = df_[f'{col}_{a}'].str.cat(df_[f'{col}_{b}'], na_rep='')
-            # カラム削除
-            df_.drop([f"{col}_{a}", f"{col}_{b}"], axis=1, inplace=True)
+            try:
+                a = str(s)
+                b = str(s + 1)
+                df_[f'{col}'] = df_[f'{col}_{a}'].str.cat(df_[f'{col}_{b}'], na_rep='')
+                # print(df_[f'{col}'])
+                # カラム削除
+                df_.drop([f"{col}_{a}", f"{col}_{b}"], axis=1, inplace=True)
+            except:
+                pass
 
+    print(f"df_after: {df_}")
+    df_.to_csv("df_after.csv")
+
+    print(cols)
     # サフィックスを削除
     cols = df_.columns.str.replace('_.*', '', regex=True)
+    print(cols)
     # カラム名変更
     df_.columns = cols
-    # パラメータ名= を削除
+
+    # 要素にある「カラム名=」を削除する。カラム名を変更した後に実行！
     for key in key_list:
-        df_[f"{key}"] = df_[f"{key}"].str.replace(f"{key}=", "")
+        df_[key] = df_[key].replace(f'{key}=', '', regex=True)
 
-    print(df_)
+    print(f"key_list: {key_list}")
 
+    # # パラメータ名= を削除
+    # for key in key_list:
+    #     df_[f"{key}"] = df_[f"{key}"].str.replace(f"{key}=", "")
+    #     print(df_[f"{key}"])
+
+    df_.to_csv("df_.csv")
     split_cols = []
     # /区切りの要素が入るカラムを特定する
     for c in cols:
-        print(c)
-        df_c = df_[df_[c].str.contains("/", na=False)]
-        # レコード数取得
-        # 0レコード以外カラム名をリストに格納する
-        if df_c.shape[0] == 0:
+        try:
+            print(f"param: {c}")
+            df_c = df_[df_[c].str.contains("/", na=False)]
+            # レコード数取得
+            # 0レコード以外カラム名をリストに格納する
+            if df_c.shape[0] == 0:
+                pass
+            else:
+                split_cols.append(c)
+                print(split_cols)
+        except:
             pass
-        else:
-            split_cols.append(c)
 
     for col in split_cols:
+        print(f"{col}=")
         df_[f"{col}"] = df_[f"{col}"].fillna("/")
         df_[f"{col}"] = df_[f"{col}"].replace('/', ',', regex=True)
         df_[f"{col}"] = df_[f"{col}"].str.split(',')
+
+
+    print(type(df_["ParamList"][0]))
+
+
+    df_.to_csv("./out/df_regex.csv")
+
 
     # 可視化の際利用
     ans = sum(df_['ParamList'], [])
@@ -188,7 +226,7 @@ def split_parameter_cols(df, raw_data_df):
     df_.to_csv("out/param_cols.csv", index=False)
 
     # 月日, 時刻, 子ユーザカラムを付与しなおす
-    df_ = pd.concat([raw_data_df[["月日", "時刻", "子ユーザ", "入力値", "コマンド"]], df_], axis=1)
+    df_ = pd.concat([raw_data_df[["月日", "時刻", "子ユーザ", "入力値", "コマンド", "受信サイズ", "受信数", "返却数"]], df_], axis=1)
 
     return df_
 
@@ -250,8 +288,10 @@ def delete_search_short_interval(df_):
             print(tmp_df[mask])
             # 最後のレコード（最後の検索）を取得する
             duplicate_excluded_df = duplicate_excluded_df.append(tmp_df[mask].tail(1), ignore_index=True)
-    # print(duplicate_excluded_df)
-    duplicate_excluded_df.to_csv("out/duplicate_excluded_df.csv", index=False)
+    print(duplicate_excluded_df)
+    duplicate_excluded_df.to_csv("out/duplicate_excluded_df_2021-11-09_promoV8NET-logdata.csv", index=False, encoding="cp932")
+    # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Engineer_V8LOG.csv", index=False,encoding="cp932")
+    # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Taiyoubuhinten_v8LOG.csv", index=False,encoding="cp932")
     return
 
 
