@@ -4,8 +4,8 @@
 ```
 $ cd mongodb_data/
 $ docker ps
-$ docker cp 2022-01-16.json {CONTAINER ID}/:data/
-# docker exec -it {CONTAINER ID} /bin/bash
+$ docker cp 2022-01-16.json {mongo: latest CONTAINER ID}/:data/
+# docker exec -it {mongo: latest CONTAINER ID} /bin/bash
 # cd /data
 # ls
   2022-01-16.json  configdb  db
