@@ -252,7 +252,7 @@ def delete_search_short_interval(df_):
     # print(df_.reset_index(drop=True))
 
     # 一定間隔の定義（秒数）
-    split_interval = 10
+    split_interval = 100000
     # 子ユーザリスト作成
     child_user_list = df_['子ユーザ'].unique()
     # 重複を除いたレコードを格納するデータフレーム
