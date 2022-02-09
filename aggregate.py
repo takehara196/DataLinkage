@@ -252,7 +252,7 @@ def delete_search_short_interval(df_):
     # print(df_.reset_index(drop=True))
 
     # 一定間隔の定義（秒数）
-    split_interval = 100000
+    split_interval = 1
     # 子ユーザリスト作成
     child_user_list = df_['子ユーザ'].unique()
     # 重複を除いたレコードを格納するデータフレーム
@@ -289,7 +289,7 @@ def delete_search_short_interval(df_):
             # 最後のレコード（最後の検索）を取得する
             duplicate_excluded_df = duplicate_excluded_df.append(tmp_df[mask].tail(1), ignore_index=True)
     print(duplicate_excluded_df)
-    duplicate_excluded_df.to_csv("out/duplicate_excluded_df_2021-11-09_promoV8NET-logdata.csv", index=False, encoding="cp932")
+    duplicate_excluded_df.to_csv("out/duplicate_excluded_df_2021-11-09_promoV8NET-logdata_1sec.csv", index=False, encoding="cp932")
     # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Engineer_V8LOG.csv", index=False,encoding="cp932")
     # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Taiyoubuhinten_v8LOG.csv", index=False,encoding="cp932")
     return
