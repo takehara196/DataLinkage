@@ -12,6 +12,22 @@ import matplotlib.pyplot as plt
 from datetime import timedelta
 import math
 from dateutil.relativedelta import relativedelta
+from pymongo import MongoClient
+
+
+# DB接続
+def _db_connect():
+    client = MongoClient('mongodb://root:password123@localhost:27017')
+    db = client.sample
+    return db
+
+
+# zips collection
+def get_zips_table(db):
+    collection = db.zips
+    find = collection.find().limit(5)
+    for doc in find:
+        print(doc)
 
 
 def read_excel():
@@ -226,7 +242,19 @@ def split_parameter_cols(df, raw_data_df):
     df_.to_csv("out/param_cols.csv", index=False)
 
     # 月日, 時刻, 子ユーザカラムを付与しなおす
-    df_ = pd.concat([raw_data_df[["月日", "時刻", "子ユーザ", "入力値", "コマンド", "受信サイズ", "受信数", "返却数"]], df_], axis=1)
+    df_ = pd.concat(
+        [raw_data_df[
+             [
+                 "月日",
+                 "時刻",
+                 "子ユーザ",
+                 "入力値",
+                 "コマンド",
+                 "受信サイズ",
+                 "受信数",
+                 "返却数"
+             ]
+         ], df_], axis=1)
 
     return df_
 
