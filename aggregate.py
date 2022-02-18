@@ -16,7 +16,7 @@ from pymongo import MongoClient
 
 
 # DB接続
-def _db_connect():
+def db_connect():
     client = MongoClient('mongodb://root:password123@localhost:27017')
     db = client.sample
     return db
@@ -25,9 +25,9 @@ def _db_connect():
 # zips collection
 def get_zips_table(db):
     collection = db.zips
-    find = collection.find().limit(5)
-    for doc in find:
-        print(doc)
+    find = collection.find()
+    df = pd.DataFrame.from_dict(list(find)).astype(object)
+    return df
 
 
 def read_excel():
@@ -146,7 +146,6 @@ def split_parameter_cols(df, raw_data_df):
 
     df_.columns = df_.columns.astype('string') + "_" + identifier.astype('string')
 
-
     # Indexのサフィックスの数値から結合
     # サフィックスの数値が0であれば何もしない
     merge_col_list = []
@@ -226,12 +225,9 @@ def split_parameter_cols(df, raw_data_df):
         df_[f"{col}"] = df_[f"{col}"].replace('/', ',', regex=True)
         df_[f"{col}"] = df_[f"{col}"].str.split(',')
 
-
     print(type(df_["ParamList"][0]))
 
-
     df_.to_csv("./out/df_regex.csv")
-
 
     # 可視化の際利用
     ans = sum(df_['ParamList'], [])
@@ -317,19 +313,22 @@ def delete_search_short_interval(df_):
             # 最後のレコード（最後の検索）を取得する
             duplicate_excluded_df = duplicate_excluded_df.append(tmp_df[mask].tail(1), ignore_index=True)
     print(duplicate_excluded_df)
-    duplicate_excluded_df.to_csv("out/duplicate_excluded_df_2021-11-09_promoV8NET-logdata_1sec.csv", index=False, encoding="cp932")
+    duplicate_excluded_df.to_csv("out/duplicate_excluded_df_2021-11-09_promoV8NET-logdata_1sec.csv", index=False,
+                                 encoding="cp932")
     # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Engineer_V8LOG.csv", index=False,encoding="cp932")
     # duplicate_excluded_df.to_csv("out/duplicate_excluded_df_Taiyoubuhinten_v8LOG.csv", index=False,encoding="cp932")
     return
 
 
 def main():
-    raw_data_df, df = read_excel()
-    drop_col_list = data_loss_rate(df)
-    not_use_cols_list = appearance_rate(df)
-    df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
-    df_ = split_parameter_cols(df, raw_data_df)
-    delete_search_short_interval(df_)
+    db = db_connect()
+    get_zips_table(db)
+    # raw_data_df, df = read_excel()
+    # drop_col_list = data_loss_rate(df)
+    # not_use_cols_list = appearance_rate(df)
+    # df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
+    # df_ = split_parameter_cols(df, raw_data_df)
+    # delete_search_short_interval(df_)
 
 
 if __name__ == '__main__':
