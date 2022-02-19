@@ -321,14 +321,14 @@ def delete_search_short_interval(df_):
 
 
 def main():
-    db = db_connect()
-    get_zips_table(db)
-    # raw_data_df, df = read_excel()
-    # drop_col_list = data_loss_rate(df)
-    # not_use_cols_list = appearance_rate(df)
-    # df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
-    # df_ = split_parameter_cols(df, raw_data_df)
-    # delete_search_short_interval(df_)
+    # db = db_connect()
+    # get_zips_table(db)
+    raw_data_df, df = read_excel()
+    drop_col_list = data_loss_rate(df)
+    not_use_cols_list = appearance_rate(df)
+    df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
+    df_ = split_parameter_cols(df, raw_data_df)
+    delete_search_short_interval(df_)
 
 
 if __name__ == '__main__':
