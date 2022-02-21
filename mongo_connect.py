@@ -28,6 +28,7 @@ def get_zips_table(db):
 
 
 
+
 def main():
     db = _db_connect()
     get_zips_table(db)

@@ -30,6 +30,13 @@ def get_zips_table(db):
     return df
 
 
+def read_mongo_csv():
+    collection_df = pd.read_csv('collection.csv')
+    print(collection_df)
+
+    return
+
+
 def read_excel():
     raw_data_df = pd.read_excel("rawdata/2021-11-09_promoV8NET-logdata.xlsx")
     # raw_data_df = pd.read_excel("rawdata/Engineer_V8LOG.xlsx")
@@ -323,12 +330,13 @@ def delete_search_short_interval(df_):
 def main():
     # db = db_connect()
     # get_zips_table(db)
-    raw_data_df, df = read_excel()
-    drop_col_list = data_loss_rate(df)
-    not_use_cols_list = appearance_rate(df)
-    df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
-    df_ = split_parameter_cols(df, raw_data_df)
-    delete_search_short_interval(df_)
+    read_mongo_csv()
+    # raw_data_df, df = read_excel()
+    # drop_col_list = data_loss_rate(df)
+    # not_use_cols_list = appearance_rate(df)
+    # df = _aggregate(raw_data_df, drop_col_list, not_use_cols_list)
+    # df_ = split_parameter_cols(df, raw_data_df)
+    # delete_search_short_interval(df_)
 
 
 if __name__ == '__main__':
