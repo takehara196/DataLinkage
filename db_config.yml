@@ -1,5 +1,0 @@
-prod:
-  host: 'oikura.clvrwo8zpveb.ap-northeast-1.rds.amazonaws.com'
-  user: 'meuser'
-  passwd: 'zW4Tsnmp'
-  db: 'oikura'
