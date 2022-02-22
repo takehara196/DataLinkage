@@ -15,8 +15,21 @@ from dateutil.relativedelta import relativedelta
 from pymongo import MongoClient
 
 
+def db_connect():
+    client = MongoClient('mongodb://root:password123@localhost:27017')
+    # client = MongoClient(f'mongodb://{}:{}@localhost:27017')
+    db = client.sample
+    return db
+
+
+def get_collection(db):
+    collection = db.zips
+    find = collection.find()
+    df = pd.DataFrame.from_dict(list(find)).astype(object)
+    return df
+
+
 def read_collection_csv():
-    # --- --- #
     raw_data_df = pd.read_csv('input/collection.csv')
     # fld_datetime(月日, 時刻)カラムは必ず使用する為, カラム使用の判別に用いない
     collection_df = raw_data_df.drop(['fld_datetime'], axis=1)
@@ -24,8 +37,10 @@ def read_collection_csv():
 
 
 def select_drop_cols(collection_df):
+    """
+    使用しないカラムを選定する
+    """
     drop_cols_list = []
-
     # --- カラム毎の欠損率確認 --- #
     null_val = collection_df.isnull().sum()
     percent = 100 * collection_df.isnull().sum() / len(collection_df)
@@ -166,6 +181,8 @@ def split_fld_param(collection_df, raw_data_df):
 
 
 def main():
+    # db = db_connect()
+    # get_collection(db)
     collection_df, raw_data_df = read_collection_csv()
     collection_df = select_drop_cols(collection_df)
     split_fld_param(collection_df, raw_data_df)
